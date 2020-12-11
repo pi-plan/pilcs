@@ -17,7 +17,8 @@
 
 ### 常见方法介绍
 
-**UUID、GUID：**标准型式包含32个16进制数字 `123e4567-e89b-12d3-a456-426655440000`。
+#### UUID、GUID
+标准型式包含32个16进制数字 `123e4567-e89b-12d3-a456-426655440000`。
 
 优点：
 
@@ -28,7 +29,8 @@
 - 通常用字符串形式使用，有些场景下不适用。
 - 不适合做B Tree 存储结构的主键，比如 MySQL 的 DB 引擎。
 
-**Snowflake 类算法：**这类算法大致上把 64 bit 划分为不同的空间。分别用来标示时间、机器编号、自增序列等。利用时间的递增特性、且因为时间戳在高位、所以整体是保持递增趋势的。
+#### Snowflake 类算法
+这类算法大致上把 64 bit 划分为不同的空间。分别用来标示时间、机器编号、自增序列等。利用时间的递增特性、且因为时间戳在高位、所以整体是保持递增趋势的。
 
 ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/39cb9821-d379-47e1-b931-3b2d5cafbe84/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/39cb9821-d379-47e1-b931-3b2d5cafbe84/Untitled.png)
 
@@ -42,7 +44,8 @@
 - 强依赖机器时钟，如果时钟回拨可能会重号或者不可用。
 - 虽然趋势上是递增的，在分布式系统中不同机器之间的时间并不一定是一致的，无法判断先后顺序。
 
-**数据库自增字段：**就是利用数据库自增字段的特征实现。
+#### 数据库自增字段
+就是利用数据库自增字段的特征实现。
 
 优点：
 
@@ -55,7 +58,8 @@
 - 性能低，受限于数据库的读写新能。在 MySQL 开启 Group Replication 的时候，虽然能避免单点问题，但是性能会更低。
 - 在分库分表系统中，采用步长的方式来避免 ID 重复，又会失去单调递增的特性。
 
-**[美团的 Leaf 方案](https://tech.meituan.com/2017/04/21/mt-leaf.html)：**也是基于 MySQL 的，不过采用 Leaf-segment 的方式减少对 MySQL 性能压力，比如每个 segment 有 1000 个ID，起点是 0 。Leaf 服务只需要在数据库设置一次 max = 1000，标记从 0 到 1000 的序列已经被分配，当服务重启的时候就从1000 作为起点，不会出现 0 - 1000 之间的序列重复。数据库返回成功之后 Leaf 服务就可以从 0 到 1000 递增分发序列号，1000 次分发序列号只需要一次数据库请求。且不会重复。并且可以同时有多个 Leaf 服务实例同时、MySQL 可以使用 Group Replication 的方式运行避免单点。
+#### [美团的 Leaf 方案](https://tech.meituan.com/2017/04/21/mt-leaf.html)
+也是基于 MySQL 的，不过采用 Leaf-segment 的方式减少对 MySQL 性能压力，比如每个 segment 有 1000 个ID，起点是 0 。Leaf 服务只需要在数据库设置一次 max = 1000，标记从 0 到 1000 的序列已经被分配，当服务重启的时候就从1000 作为起点，不会出现 0 - 1000 之间的序列重复。数据库返回成功之后 Leaf 服务就可以从 0 到 1000 递增分发序列号，1000 次分发序列号只需要一次数据库请求。且不会重复。并且可以同时有多个 Leaf 服务实例同时、MySQL 可以使用 Group Replication 的方式运行避免单点。
 
 优点：
 
@@ -71,7 +75,8 @@
 - 整套服务涉及 Leaf 服务、数据库、数据库同步等运维复杂。
 - 因为用多个 Leaf 服务实例保障可用性，造成是趋势递增，不是单调递增序列。
 
-**[微信的 seqsvr](https://mp.weixin.qq.com/s?__biz=MzI4NDMyNTU2Mw==&mid=2247483679&idx=1&sn=584dbd80aa08fa1188627ad725680928&mpshare=1&scene=1&srcid=1208L9z4yXKLW60rPph2ZmMn#rd)：**大致思路上与 Leaf 类似，都是基于数据库、分段获取但是在可用性保障上略有不同。
+#### [微信的 seqsvr](https://mp.weixin.qq.com/s?__biz=MzI4NDMyNTU2Mw==&mid=2247483679&idx=1&sn=584dbd80aa08fa1188627ad725680928&mpshare=1&scene=1&srcid=1208L9z4yXKLW60rPph2ZmMn#rd)
+大致思路上与 Leaf 类似，都是基于数据库、分段获取但是在可用性保障上略有不同。
 
 1. 把存储层和缓存中间层分成两个模块StoreSvr及AllocSvr。StoreSvr为存储层，利用了多机NRW策略来保证数据持久化后不丢失；AllocSvr 层负责分发序列号
 2. AllocSvr 需要跟 StoreSvr 保持租约。
