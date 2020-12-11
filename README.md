@@ -32,7 +32,7 @@
 #### Snowflake 类算法
 这类算法大致上把 64 bit 划分为不同的空间。分别用来标示时间、机器编号、自增序列等。利用时间的递增特性、且因为时间戳在高位、所以整体是保持递增趋势的。
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/39cb9821-d379-47e1-b931-3b2d5cafbe84/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/39cb9821-d379-47e1-b931-3b2d5cafbe84/Untitled.png)
+![snowflake.png](./static/snowflake.png)
 
 优点：
 
@@ -122,6 +122,6 @@
 
 基于 Raft 算法，Leader 对外提供发号服务，利用 Raft 的机制保障高可用。Leader 当选的从持久化数据里获取当前已经分配的最大序列好「X」，然后在这 X 的基础上增加批量获取的大小「N」把 「X + N」作为结果持久化存储。当序列快分发完的时候，异步chi jiu
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/20b9ce79-6cd0-48e0-b1f0-6c986af01a87/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/20b9ce79-6cd0-48e0-b1f0-6c986af01a87/Untitled.png)
+![PiLCS.png](./static/PiLCS.png)
 
 选举、寻找 leader 等流程完全使用 Raft 算法。
